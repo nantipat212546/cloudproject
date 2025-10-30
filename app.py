@@ -11,8 +11,8 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # === DATABASE (RDS) ===
-DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///recipes.db')
-engine = create_engine(DATABASE_URL)
+DATABASE_URI = 'sqlite:///recipes.db'
+engine = create_engine(DATABASE_URI)
 Base = declarative_base()
 
 # === S3 (สำหรับรูป) ===
@@ -214,7 +214,43 @@ def add_recipe():
     return render_template('add.html')
 
 # === แก้ไขสูตร ===
+@app.route('/add', methods=['GET', 'POST']) # === เพิ่มสูตร ===
 @app.route('/add', methods=['GET', 'POST'])
+@login_required
+def add_recipe():
+    if request.method == 'POST':
+        name = request.form['name']
+        ingredients = request.form['ingredients']
+        instructions = request.form['instructions']
+        image_file = request.files.get('image')
+        image_filename = upload_to_s3(image_file) if image_file else None
+
+        session = Session()
+        recipe = Recipe(name=name, ingredients=ingredients, instructions=instructions, image=image_filename, user_id=current_user.id)
+        session.add(recipe)
+        session.commit()
+        session.close()
+        return redirect(url_for('home'))
+    return render_template('add.html')
+
+# === แก้ไขสูตร ===
+@app.route('/edit', methods=['GET', 'POST'])
+@login_required
+def add_recipe():
+    if request.method == 'POST':
+        name = request.form['name']
+        ingredients = request.form['ingredients']
+        instructions = request.form['instructions']
+        image_file = request.files.get('image')
+        image_filename = upload_to_s3(image_file) if image_file else None
+
+        session = Session()
+        recipe = Recipe(name=name, ingredients=ingredients, instructions=instructions, image=image_filename, user_id=current_user.id)
+        session.add(recipe)
+        session.commit()
+        session.close()
+        return redirect(url_for('home'))
+    return render_template('add.html')
 @login_required
 def add_recipe():
     if request.method == 'POST':
