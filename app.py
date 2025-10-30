@@ -215,7 +215,6 @@ def add_recipe():
 
 # === แก้ไขสูตร ===
 @app.route('/add', methods=['GET', 'POST']) # === เพิ่มสูตร ===
-@app.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_recipe():
     if request.method == 'POST':
