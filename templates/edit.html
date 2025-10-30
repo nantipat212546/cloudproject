@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}แก้ไขสูตร - {{ recipe.name }}{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>แก้ไขสูตร: {{ recipe.name }}</h2>
+    
+    <form method="POST" enctype="multipart/form-data" class="recipe-form">
+        <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+
+        <div class="form-group">
+            <label for="name">ชื่อสูตร <span class="required">*</span></label>
+            <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                value="{{ recipe.name }}" 
+                required 
+                placeholder="เช่น ต้มยำกุ้ง"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="ingredients">ส่วนผสม (คั่นด้วย comma)</label>
+            <textarea 
+                id="ingredients" 
+                name="ingredients" 
+                rows="4" 
+                placeholder="เช่น กุ้ง, ตะไคร้, ใบมะกรูด, มะนาว"
+            >{{ recipe.ingredients }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="instructions">วิธีทำ (ทีละขั้นตอน) <span class="required">*</span></label>
+            <textarea 
+                id="instructions" 
+                name="instructions" 
+                rows="8" 
+                required 
+                placeholder="1. ต้มน้ำ...&#10;2. ใส่กุ้ง..."
+            >{{ recipe.instructions }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="image">รูปภาพสูตร (ไม่บังคับ)</label>
+            {% if recipe.image %}
+                <div class="current-image">
+                    <p>รูปปัจจุบัน:</p>
+                    <img src="{{ url_for('static', filename='images/' + recipe.image) }}" alt="{{ recipe.name }}" style="max-width: 200px; border-radius: 12px; margin-top: 8px;">
+                </div>
+            {% endif %}
+            <input type="file" id="image" name="image" accept="image/*">
+            <small>รองรับ JPG, PNG ขนาดไม่เกิน 5MB</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">อัปเดตสูตร</button>
+            <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="btn-secondary">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}สมัครสมาชิก{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>สมัครสมาชิก</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <p style="color:red;">{{ msg }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST">
+        <input type="text" name="username" placeholder="ชื่อผู้ใช้" required>
+        <input type="password" name="password" placeholder="รหัสผ่าน" required>
+        <button type="submit">สมัครสมาชิก</button>
+    </form>
+    <p>มีบัญชีแล้ว? <a href="{{ url_for('login') }}">เข้าสู่ระบบ</a></p>
+</div>
+{% endblock %}

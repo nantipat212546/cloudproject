@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เมนูอาหารไทยจากตู้เย็น</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <h1>เมนูอาหารไทยจากตู้เย็น</h1>
+        <p>ของเหลือในตู้เย็น ได้เมนูอร่อยใน 1 นาที!</p>
+    </div>
+    <div class="container">
+
+        
+        <!-- ช่องค้นหา -->
+        <form method="POST" class="search-form">
+            <input 
+                type="text" 
+                name="ingredients" 
+                placeholder="ค้นหาด้วยวัตถุดิบ เช่น ไก่, มะเขือเทศ, ตะไคร้" 
+                value="{{ request.form.ingredients if request.form.ingredients else '' }}"
+            >
+            <button type="submit">ค้นหา</button>
+            <a href="{{ url_for('home') }}" class="clear-btn">ล้าง</a>
+        </form>
+
+        <div class="my-recipes-link" style="text-align: center; margin: 25px 0;">
+            <a href="{{ url_for('my_recipes') }}" class="btn-primary">
+                <i class="fas fa-utensils"></i> สูตรของฉัน
+            </a>
+        </div>
+
+        <a href="{{ url_for('add_recipe') }}" class="add-link">เพิ่มสูตรอาหาร</a>
+        
+        <!-- ใกล้ ๆ กับปุ่ม "เพิ่มสูตรอาหาร" -->
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('favorites') }}" class="add-link">
+                สูตรที่ฉันบันทึก
+            </a>
+            <a href="{{ url_for('logout') }}" class="add-link" style="color:#e74c3c;">
+                ออกจากระบบ ({{ current_user.username }})
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="add-link">เข้าสู่ระบบ</a>
+            <a href="{{ url_for('register') }}" class="add-link">สมัครสมาชิก</a>
+        {% endif %}
+
+        <!-- รายการเมนู -->
+        <div class="menu-container">
+            {% if recipes %}
+                {% for recipe, fav_count in recipes %}
+                <div class="menu-card">
+                    <div class="menu-image">
+                        {% if recipe.image %}
+                            <!-- แก้ตรงนี้: ใช้ S3 URL -->
+                            <img src="{{ s3_url }}/images/{{ recipe.image or 'default.jpg' }}" alt="{{ recipe.name }}">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="ไม่มีรูป">
+                        {% endif %}
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-header">
+                            <h3><a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}">{{ recipe.name }}</a></h3>
+                            
+                            <!-- ปุ่มหัวใจ + จำนวน -->
+                            <a href="{{ url_for('favorite', recipe_id=recipe.id) }}" class="fav-btn">
+                                <i class="fas fa-heart"></i>
+                                {% if fav_count > 0 %}{{ fav_count }}{% else %}บันทึก{% endif %}
+                            </a>
+
+                            <!-- แก้ไข/ลบ -->
+                            {% if current_user.is_authenticated and recipe.user_id == current_user.id %}
+                                <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}" class="edit-btn">แก้ไข</a>
+                                <a href="{{ url_for('delete_recipe', recipe_id=recipe.id) }}" class="delete-btn" onclick="return confirm('ลบจริง?')">ลบ</a>
+                            {% endif %}
+                        </div>
+                        <p class="ingredients-preview">
+                            {{ recipe.ingredients | truncate(80, True, '...') }}
+                        </p>
+                        <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="view-btn">ดูสูตรเต็ม</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-result">
+                    ไม่พบเมนูที่ตรงกับวัตถุดิบ<br>
+                    <a href="{{ url_for('add_recipe') }}">เพิ่มสูตรใหม่</a>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

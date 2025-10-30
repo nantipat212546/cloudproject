@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}สูตรที่ฉันบันทึก{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>สูตรที่ฉันบันทึก</h1>
+    <p>เมนูที่คุณกดหัวใจไว้</p>
+
+    {% if recipes %}
+        <div class="menu-container">
+            {% for recipe in recipes %}
+            <div class="menu-card">
+                <div class="menu-image">
+                    {% if recipe.image %}
+                        <img src="{{ url_for('static', filename='images/' + recipe.image) }}" alt="{{ recipe.name }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="ไม่มีรูป">
+                    {% endif %}
+                </div>
+                <div class="menu-content">
+                    <div class="menu-header">
+                        <h3><a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}">{{ recipe.name }}</a></h3>
+                        <a href="{{ url_for('favorite', recipe_id=recipe.id) }}" class="fav-btn">
+                            <i class="fas fa-heart"></i>
+                        </a>
+                    </div>
+                    <p class="ingredients-preview">
+                        {{ recipe.ingredients | truncate(80, True, '...') }}
+                    </p>
+                    <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="view-btn">ดูสูตรเต็ม</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-result">คุณยังไม่ได้บันทึกสูตรใด ๆ</p>
+        <a href="{{ url_for('home') }}" class="add-link">ไปเลือกสูตรที่ชอบ</a>
+    {% endif %}
+
+    <a href="{{ url_for('home') }}" class="back-btn">กลับหน้าหลัก</a>
+</div>
+{% endblock %}

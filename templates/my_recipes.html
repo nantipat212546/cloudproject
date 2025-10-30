@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}สูตรของฉัน{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="page-title">สูตรของฉัน</h2>
+
+    {% if recipes %}
+        <div class="menu-container">
+            {% for recipe in recipes %}
+            <div class="menu-card">
+                <div class="menu-image">
+                    {% if recipe.image %}
+                        <!-- แก้ตรงนี้: ใช้ S3 URL -->
+                        <img src="{{ s3_url }}/images/{{ recipe.image or 'default.jpg' }}" alt="{{ recipe.name }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="ไม่มีรูป">
+                    {% endif %}
+                </div>
+                <div class="menu-content">
+                    <div class="menu-header">
+                        <h3><a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}">{{ recipe.name }}</a></h3>
+                        <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}" class="edit-btn">แก้ไข</a>
+                        <a href="{{ url_for('delete_recipe', recipe_id=recipe.id) }}" class="delete-btn" onclick="return confirm('ลบจริง?')">ลบ</a>
+                    </div>
+                    <p class="ingredients-preview">{{ recipe.ingredients | truncate(80) }}</p>
+                    <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="view-btn">ดูสูตรเต็ม</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-data">คุณยังไม่มีสูตรอาหาร</p>
+        <a href="{{ url_for('add_recipe') }}" class="btn-primary" style="display: inline-block; margin-top: 20px;">เพิ่มสูตรแรกของคุณ</a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block nav_right %}
+<!-- แทนที่ nav-right เดิมด้วยปุ่ม Back เพียงอันเดียว -->
+<div class="nav-right">
+    <a href="{{ url_for('home') }}" class="nav-link back-btn">
+        <i class="fas fa-arrow-left"></i> กลับ
+    </a>
+</div>
+{% endblock %}

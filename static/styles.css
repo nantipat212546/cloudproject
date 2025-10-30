@@ -1,0 +1,603 @@
+/* === รีเซ็ต & ฟอนต์หลัก === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Kanit', sans-serif;
+    background: url('/static/images/thai-food-bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    animation: zoomBG 20s ease infinite;
+    min-height: 100vh;
+    position: relative;
+    /*color: #2c3e50 !important; /* บังคับสีหลัก */
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /*background: rgba(255, 255, 255, 0.7); /* เพิ่มกลับมาเล็กน้อย */
+    z-index: -1;
+}
+
+/* === Header สวย === */
+.header {
+    text-align: center;
+    padding: 30px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    margin: 20px auto;
+    max-width: 900px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+}
+
+.header h1 {
+    font-size: 2.5em;
+    color: #75271f;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.header h1 i {
+    font-size: 1.2em;
+    color: #f39c12;
+}
+
+.header p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+    font-weight: 300;
+    margin: 0;
+}
+
+/* === เมนูในบรรทัดเดียวกัน === */
+/* === เมนูในบรรทัดเดียวกัน + อยู่ขวา === */
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* เรียงจากซ้ายไปขวา */
+    gap: 2rem; /* ระยะระหว่างหัวข้อกับปุ่ม */
+    flex-wrap: nowrap; /* ไม่พับบรรทัด */
+}
+
+
+.nav-right {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;                   /* ไม่ให้หด */
+    white-space: nowrap;
+    margin-left: auto;                /* ดันไปขวาสุด */
+}
+
+/* เมนูหลัก – สีเข้ม + อ่านชัดบนพื้นหลังส้ม */
+.nav-link {
+    color: #000000 !important;           /* ดำสนิท */
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2) !important;
+    backdrop-filter: blur(8px) !important;
+    transition: all 0.3s ease !important;
+    white-space: nowrap !important;
+}
+
+.nav-link:hover {
+    background: #27ae60 !important;
+    color: white !important;
+    transform: translateY(-3px) !important;
+}
+
+.logout {
+    color: #0e3ce0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 600 !important;
+}
+
+.logout:hover {
+    background: #0f0fba !important;
+    color: white !important;
+}
+
+/* === Responsive: มือถือให้พับลง === */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .nav-right {
+        margin-left: 0;
+        margin-top: 1rem;
+        justify-content: center;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+/* ปุ่มหัวใจ */
+.fav-btn {
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* === คอนเทนเนอร์หลัก === */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* === ช่องค้นหา === */
+.search-form {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    padding: 0 10px;
+}
+
+.search-form input {
+    flex: 1;
+    min-width: 300px;
+    max-width: 550px;
+    padding: 16px 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    outline: none;
+    font-family: 'Prompt', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.search-form input:focus {
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+    transform: translateY(-2px);
+}
+
+.search-form button {
+    padding: 16px 28px;
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-form button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(39, 174, 96, 0.5);
+}
+
+.clear-btn {
+    background: #ecf0f1;
+    color: #95a5a6;
+    padding: 16px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.clear-btn:hover {
+    background: #bdc3c7;
+}
+
+/* === ปุ่มเพิ่มสูตร === */
+.add-link {
+    display: block;
+    text-align: center;
+    margin: 20px 0;
+    color: #020000;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 1.1em;
+    transition: 0.3s;
+}
+
+.add-link:hover {
+    color: #1d7ebe;
+    transform: scale(1.05);
+}
+
+/* === การ์ดเมนู (Grid + เงา + แอนิเมชัน) === */
+.menu-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 20px 10px;
+}
+
+.menu-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    transition: all 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.menu-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-card:nth-child(2) { animation-delay: 0.2s; }
+.menu-card:nth-child(3) { animation-delay: 0.3s; }
+.menu-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.menu-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+/* === รูปอาหาร === */
+.menu-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.menu-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.menu-card:hover .menu-image img {
+    transform: scale(1.1);
+}
+
+.menu-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(transparent, rgba(0,0,0,0.4));
+}
+
+/* === เนื้อหา === */
+.menu-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.menu-header h3 {
+    font-size: 1.3em;
+    color: #2c3e50;
+    margin: 0;
+    font-weight: 600;
+}
+
+.menu-header h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.match-badge {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+    font-size: 0.8em;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ingredients-preview {
+    color: #7f8c8d;
+    font-size: 0.95em;
+    margin: 12px 0;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.view-btn {
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+}
+
+/* === หน้าสูตร === */
+.recipe-image {
+    width: 100%;
+    max-width: 700px;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 20px;
+    margin: 30px auto;
+    display: block;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.instructions {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 18px;
+    line-height: 2;
+    font-size: 1.1em;
+    margin: 25px 0;
+    border-left: 5px solid #27ae60;
+    white-space: pre-line;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 30px;
+    background: #95a5a6;
+    color: white;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .header h1 { font-size: 2em; }
+    .search-form input { min-width: 100%; }
+    .menu-container { grid-template-columns: 1fr; }
+}
+
+.fav-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #e74c3c;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: rgba(231, 76, 60, 0.1);
+    transition: all 0.3s ease;
+}
+
+.fav-btn:hover {
+    background: rgba(231, 76, 60, 0.2);
+    transform: scale(1.1);
+}
+
+.fav-btn i {
+    transition: all 0.3s ease;
+}
+
+.fav-btn:hover i {
+    transform: scale(1.3);
+}
+
+.auth-form {
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-form input {
+    padding: 14px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-size: 16px;
+}
+
+.auth-form button {
+    background: #27ae60;
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* === ฟอร์มสวย + Box ครอบ === */
+.form-container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.form-container h2 {
+    text-align: center;
+    color: #e74c3c;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.recipe-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+}
+
+.form-group label .required {
+    color: #e74c3c;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 14px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #27ae60;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+    outline: none;
+}
+
+.form-group small {
+    color: #7f8c8d;
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
+}
+
+.btn-secondary {
+    background: #ecf0f1;
+    color: #95a5a6;
+}
+
+.btn-secondary:hover {
+    background: #bdc3c7;
+    color: #2c3e50;
+}
+
+.alert {
+    background: #ffeaa7;
+    color: #d63031;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.edit-btn, .delete-btn {
+    font-size: 0.8em;
+    padding: 4px 8px;
+    margin-left: 5px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+.edit-btn { background: #f39c12; color: white; }
+.delete-btn { background: #e74c3c; color: white; }
+.edit-btn:hover, .delete-btn:hover { opacity: 0.8; }
+
+/* ปุ่ม Back ใน nav ของ my_recipes */
+.back-btn {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #2c3e50 !important;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    transition: all 0.3s ease !important;
+}
+
+.back-btn:hover {
+    background: #27ae60 !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+

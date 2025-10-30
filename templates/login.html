@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}เข้าสู่ระบบ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>เข้าสู่ระบบ</h1>
+    
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert">
+          {% for msg in messages %}
+            <p>{{ msg }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="auth-form">
+        <input type="text" name="username" placeholder="ชื่อผู้ใช้" required>
+        <input type="password" name="password" placeholder="รหัสผ่าน" required>
+        <button type="submit">เข้าสู่ระบบ</button>
+    </form>
+
+    <p>ยังไม่มีบัญชี? <a href="{{ url_for('register') }}">สมัครสมาชิก</a></p>
+</div>
+{% endblock %}

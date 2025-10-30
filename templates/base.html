@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}สูตรอาหารไทย{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header + เมนูในบรรทัดเดียว -->
+    <header class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-utensils"></i> สูตรอาหารไทย</h1>
+
+            <!-- เมนูอยู่ขวา + บรรทัดเดียว -->
+            <nav class="nav-right">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('my_recipes') }}" class="nav-link">สูตรของฉัน</a>
+                    <a href="{{ url_for('add_recipe') }}" class="nav-link">เพิ่มสูตรอาหาร</a>
+                    <a href="{{ url_for('favorites') }}" class="nav-link">สูตรที่ฉันบันทึก</a>
+                    <a href="{{ url_for('logout') }}" class="nav-link logout">ออกจากระบบ</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">เข้าสู่ระบบ</a>
+                    <a href="{{ url_for('register') }}" class="nav-link">สมัครสมาชิก</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert">
+              {% for msg in messages %}
+                <p>{{ msg }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 สูตรอาหารไทย โดยคุณ</p>
+        </div>
+    </footer>
+</body>
+</html>
