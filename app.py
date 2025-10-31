@@ -3,14 +3,14 @@ import boto3
 from flask import Flask, request, redirect, url_for, render_template, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, func
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from sqlalchemy.orm import declarative_base, sessionmaker
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-# === DATABASE (RDS) ===
+# === DATABASE (SQLite) ===
 DATABASE_URI = 'sqlite:///recipes.db'
 engine = create_engine(DATABASE_URI)
 Base = declarative_base()
@@ -33,65 +33,8 @@ class User(UserMixin, Base):
     username = Column(String(50), unique=True, nullable=False)
     password = Column(String(200), nullable=False)
     recipes = relationship('Recipe', backref='author', lazy=True)
-
-class Recipe(Base):
-    __tablename__ = 'recipes'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    ingredients = Column(Text, nullable=False)
-    instructions = Column(Text, nullable=False)
-    image = Column(String(200), nullable=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-
-# === Login Manager ===
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-@login_manager.user_loader
-def load_user(user_id):
-    session = Session()
-    user = session.get(User, int(user_id))
-    session.close()
-    return user
-
-# === อัปโหลดรูป ===
-UPLOAD_FOLDER = 'static/images'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def save_image(file):
-    if file and allowed_file(file.filename):
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"{uuid.uuid4().hex}.{ext}"
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return filename
-    return None
-
-# === ฐานข้อมูล ===
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE_URI = f'sqlite:///{os.path.join(BASE_DIR, "recipes.db")}'
-engine = create_engine(DATABASE_URI)
-Base = declarative_base()
-
-# User
-class User(UserMixin, Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(200), nullable=False)
-    recipes = relationship('Recipe', backref='author', lazy=True)
     favorites = relationship('Favorite', backref='user', lazy=True)
 
-# Recipe
 class Recipe(Base):
     __tablename__ = 'recipes'
     id = Column(Integer, primary_key=True)
@@ -101,7 +44,6 @@ class Recipe(Base):
     image = Column(String(200), nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-# Favorite
 class Favorite(Base):
     __tablename__ = 'favorites'
     id = Column(Integer, primary_key=True)
@@ -119,7 +61,7 @@ login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(user_id):
     session = Session()
-    user = session.get(User, int(user_id))  # ใช้ session.get() แทน query.get()
+    user = session.get(User, int(user_id))
     session.close()
     return user
 
@@ -127,8 +69,6 @@ def load_user(user_id):
 @app.route('/', methods=['GET', 'POST'])
 def home():
     session = Session()
-    
-    # ดึงสูตร + จำนวนคนบันทึก
     recipes_with_count = session.query(
         Recipe,
         func.count(Favorite.id).label('fav_count')
@@ -194,7 +134,7 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-# === เพิ่มสูตร ===
+# === เพิ่มสูตร (เหลือ 1 อัน) ===
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_recipe():
@@ -213,66 +153,37 @@ def add_recipe():
         return redirect(url_for('home'))
     return render_template('add.html')
 
-# === แก้ไขสูตร ===
-@app.route('/add', methods=['GET', 'POST']) # === เพิ่มสูตร ===
+# === แก้ไขสูตร (เปลี่ยนชื่อ + route) ===
+@app.route('/edit/<int:recipe_id>', methods=['GET', 'POST'])
 @login_required
-def add_recipe():
-    if request.method == 'POST':
-        name = request.form['name']
-        ingredients = request.form['ingredients']
-        instructions = request.form['instructions']
-        image_file = request.files.get('image')
-        image_filename = upload_to_s3(image_file) if image_file else None
-
-        session = Session()
-        recipe = Recipe(name=name, ingredients=ingredients, instructions=instructions, image=image_filename, user_id=current_user.id)
-        session.add(recipe)
-        session.commit()
-        session.close()
+def edit_recipe(recipe_id):
+    session = Session()
+    recipe = session.get(Recipe, recipe_id)
+    
+    if not recipe or recipe.user_id != current_user.id:
+        flash('ไม่พบสูตรหรือไม่มีสิทธิ์', 'error')
         return redirect(url_for('home'))
-    return render_template('add.html')
 
-# === แก้ไขสูตร ===
-@app.route('/edit', methods=['GET', 'POST'])
-@login_required
-def add_recipe():
     if request.method == 'POST':
-        name = request.form['name']
-        ingredients = request.form['ingredients']
-        instructions = request.form['instructions']
+        recipe.name = request.form['name']
+        recipe.ingredients = request.form['ingredients']
+        recipe.instructions = request.form['instructions']
         image_file = request.files.get('image')
-        image_filename = upload_to_s3(image_file) if image_file else None
-
-        session = Session()
-        recipe = Recipe(name=name, ingredients=ingredients, instructions=instructions, image=image_filename, user_id=current_user.id)
-        session.add(recipe)
+        if image_file and image_file.filename:
+            recipe.image = upload_to_s3(image_file)
         session.commit()
-        session.close()
-        return redirect(url_for('home'))
-    return render_template('add.html')
-@login_required
-def add_recipe():
-    if request.method == 'POST':
-        name = request.form['name']
-        ingredients = request.form['ingredients']
-        instructions = request.form['instructions']
-        image_file = request.files.get('image')
-        image_filename = upload_to_s3(image_file) if image_file else None
-
-        session = Session()
-        recipe = Recipe(name=name, ingredients=ingredients, instructions=instructions, image=image_filename, user_id=current_user.id)
-        session.add(recipe)
-        session.commit()
-        session.close()
-        return redirect(url_for('home'))
-    return render_template('add.html')
+        flash('อัปเดตสูตรสำเร็จ!', 'success')
+        return redirect(url_for('view_recipe', recipe_id=recipe.id))
+    
+    session.close()
+    return render_template('edit.html', recipe=recipe)
 
 # === ลบสูตร ===
 @app.route('/delete/<int:recipe_id>')
 @login_required
 def delete_recipe(recipe_id):
     session = Session()
-    recipe = session.query(Recipe).get(recipe_id)
+    recipe = session.get(Recipe, recipe_id)
     if recipe and recipe.user_id == current_user.id:
         session.delete(recipe)
         session.commit()
@@ -305,12 +216,13 @@ def favorites():
 @app.route('/recipe/<int:recipe_id>')
 def view_recipe(recipe_id):
     session = Session()
-    recipe = session.query(Recipe).get(recipe_id)
+    recipe = session.get(Recipe, recipe_id)
     session.close()
     if not recipe:
         return "ไม่พบ", 404
     return render_template('recipe.html', recipe=recipe)
 
+# === สูตรของฉัน ===
 @app.route('/my-recipes')
 @login_required
 def my_recipes():
@@ -322,14 +234,12 @@ def my_recipes():
     session.close()
     return render_template('my_recipes.html', recipes=recipes)
 
+# === S3 URL ===
 @app.context_processor
 def inject_s3_url():
     bucket = os.environ.get('S3_BUCKET', 'recipe-app-lab-66070281')
     region = os.environ.get('AWS_REGION', 'us-east-1')
     return dict(s3_url=f"https://{bucket}.s3.{region}.amazonaws.com")
 
-
-
 if __name__ == '__main__':
-    app.run(debug=True)
-    
+    app.run(host='0.0.0.0', port=5000, debug=False)
